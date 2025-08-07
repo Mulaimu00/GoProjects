@@ -50,13 +50,16 @@ func NewServer(todoSvc *todo.Service) *Server {
 			writer.WriteHeader(http.StatusBadRequest)
 			return
 		}
-		if id < 0 || id >= len(todoSvc.GetAll()) {
+		if id < 0 || id >= (todoSvc.Len()) {
 			writer.WriteHeader(http.StatusNotFound)
 			return
 		}
-		todoSvc.Remove(id)
-		writer.WriteHeader(http.StatusNoContent)
-		return
+		err = todoSvc.Remove(id)
+		if err != nil {
+			log.Printf("failed to remove todo at index %d: %v", id, err)
+			writer.WriteHeader(http.StatusNotFound)
+			return
+		}
 
 	})
 	return &Server{
